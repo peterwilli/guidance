@@ -4,7 +4,7 @@ from typing import Any, Dict, Type, TYPE_CHECKING, Union
 import pydantic
 
 
-class GenerateJsonSchemaSafe(pydantic.json_schema.GenerateJsonSchema):
+class GenerateJsonSchemaSafe():
     """
     Subclass pydantic's GenerateJsonSchema to catch pydantic schemas that will not
     translate properly to json schemas used for generation.
@@ -16,15 +16,8 @@ class GenerateJsonSchemaSafe(pydantic.json_schema.GenerateJsonSchema):
     """
 
     def generate_inner(self, schema):
-        if schema["type"] == "dict":
-            key_type = schema["keys_schema"]["type"]
-            if key_type != "str":
-                raise TypeError(
-                    f"JSON does not support non-string keys, got type {key_type}"
-                )
-        return super().generate_inner(schema)
-
-
+        pass
+    
 def pydantic_to_json_schema(
     schema: Union[Type["pydantic.BaseModel"], "pydantic.TypeAdapter"]
 ) -> Dict[str, Any]:

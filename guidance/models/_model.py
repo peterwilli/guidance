@@ -856,7 +856,7 @@ class Engine:
             + str(prompt[-40:])
         )
 
-
+_stop = False
 class Model:
     """The base guidance model object, which represents a model in a given state.
 
@@ -985,6 +985,10 @@ class Model:
             new_lm._event_parent = self._event_parent  
 
         return new_lm
+
+    def stop(self):
+        global _stop
+        _stop = True
 
     def _inplace_append(self, value, force_silent=False):
         """This is the base way to add content to the current LM object that is being constructed.
@@ -1332,6 +1336,7 @@ class Model:
     #         return self
 
     def _run_stateless(self, stateless_function, temperature=0.0, top_p=1.0, n=1):
+        global _stop
         assert (
             Model._grammar_only == 0
         ), "We can't run grammar parsing while in context free mode! (for example inside a block closer)"
@@ -1359,7 +1364,10 @@ class Model:
             delayed_bytes = b""
             # last_is_generated = False
             for chunk in gen_obj:
-
+                if _stop:
+                    _stop = False
+                    return lm
+ 
                 # we make everything full probability if we are not computing uncertainty
                 # if not self.engine.compute_log_probs:
                 #     chunk.new_bytes_prob = 1.0
